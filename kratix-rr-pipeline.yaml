@@ -1,0 +1,193 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2022-11-11T11:59:19Z"
+  labels:
+    kratix-promise-id: jenkins-promise-default
+    kratix-promise-resource-request-id: jenkins-promise-default-default-example
+  name: request-pipeline-jenkins-promise-default-d8b82
+  namespace: default
+  resourceVersion: "832"
+  uid: 86a06a9f-7d91-4985-9e17-f3c137d543cf
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - ./work-creator -identifier jenkins-promise-default-default-example -input-directory
+      /work-creator-files
+    image: syntasso/kratix-platform-work-creator:main
+    imagePullPolicy: IfNotPresent
+    name: writer
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /work-creator-files/input
+      name: output
+    - mountPath: /work-creator-files/metadata
+      name: metadata
+    - mountPath: /work-creator-files/kratix-system
+      name: promise-cluster-selectors
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-z558n
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  initContainers:
+  - command:
+    - sh
+    - -c
+    - kubectl get jenkins.example.promise.syntasso.io example --namespace default
+      -oyaml > /output/object.yaml
+    image: bitnami/kubectl:1.20.10
+    imagePullPolicy: IfNotPresent
+    name: reader
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /output
+      name: input
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-z558n
+      readOnly: true
+  - image: syntasso/jenkins-request-pipeline
+    imagePullPolicy: Always
+    name: xaas-request-pipeline-stage-1
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /input
+      name: input
+    - mountPath: /output
+      name: output
+    - mountPath: /metadata
+      name: metadata
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-z558n
+      readOnly: true
+  nodeName: platform-control-plane
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: OnFailure
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: jenkins-promise-default-sa
+  serviceAccountName: jenkins-promise-default-sa
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - emptyDir: {}
+    name: input
+  - emptyDir: {}
+    name: output
+  - emptyDir: {}
+    name: metadata
+  - configMap:
+      defaultMode: 420
+      items:
+      - key: selectors
+        path: promise-cluster-selectors
+      name: cluster-selectors-jenkins-promise-default
+    name: promise-cluster-selectors
+  - name: kube-api-access-z558n
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-11T11:59:35Z"
+    reason: PodCompleted
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-11T11:59:19Z"
+    reason: PodCompleted
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-11T11:59:19Z"
+    reason: PodCompleted
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-11T11:59:19Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://c0c9b4f2eb354db6ce43adf2e352b7090b2ceaf91b2d089af4431fa79e62a383
+    image: docker.io/syntasso/kratix-platform-work-creator:main
+    imageID: docker.io/syntasso/kratix-platform-work-creator@sha256:f4a7ab3798b1b57ff084c033996bb30681880762664842324c98d5c1cab60caf
+    lastState: {}
+    name: writer
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://c0c9b4f2eb354db6ce43adf2e352b7090b2ceaf91b2d089af4431fa79e62a383
+        exitCode: 0
+        finishedAt: "2022-11-11T11:59:42Z"
+        reason: Completed
+        startedAt: "2022-11-11T11:59:42Z"
+  hostIP: 172.18.0.2
+  initContainerStatuses:
+  - containerID: containerd://8833e5130aebf38ecfdcbb911fafa24b98095b0d81b33df2e26297becd475d99
+    image: docker.io/bitnami/kubectl:1.20.10
+    imageID: docker.io/bitnami/kubectl@sha256:d3b2a9089c273a5de78a765e7c4e8c55ea688a2b58cbfedeb396e4a402e0a606
+    lastState: {}
+    name: reader
+    ready: true
+    restartCount: 0
+    state:
+      terminated:
+        containerID: containerd://8833e5130aebf38ecfdcbb911fafa24b98095b0d81b33df2e26297becd475d99
+        exitCode: 0
+        finishedAt: "2022-11-11T11:59:30Z"
+        reason: Completed
+        startedAt: "2022-11-11T11:59:29Z"
+  - containerID: containerd://aa7825436c852b436ddc6caecd0a5f25eeecca19c0e1889cb5efb135b43767db
+    image: docker.io/syntasso/jenkins-request-pipeline:latest
+    imageID: docker.io/syntasso/jenkins-request-pipeline@sha256:f839483989adc7c6c60d97d03725d4f34a649ea3abc65952ec19c0238bb72164
+    lastState: {}
+    name: xaas-request-pipeline-stage-1
+    ready: true
+    restartCount: 0
+    state:
+      terminated:
+        containerID: containerd://aa7825436c852b436ddc6caecd0a5f25eeecca19c0e1889cb5efb135b43767db
+        exitCode: 0
+        finishedAt: "2022-11-11T11:59:35Z"
+        reason: Completed
+        startedAt: "2022-11-11T11:59:35Z"
+  phase: Succeeded
+  podIP: 10.244.0.7
+  podIPs:
+  - ip: 10.244.0.7
+  qosClass: BestEffort
+  startTime: "2022-11-11T11:59:19Z"
